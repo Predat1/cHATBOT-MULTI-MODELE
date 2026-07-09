@@ -111,8 +111,11 @@ export const isDemo = process.env.IS_DEMO === "1";
 type GatewayModel = {
   id: string;
   name: string;
-  type?: string;
-  tags?: string[];
+  description?: string;
+  architecture?: {
+    input_modalities?: string[];
+  };
+  supported_parameters?: string[];
 };
 
 export type GatewayModelWithCapabilities = ChatModel & {
@@ -123,7 +126,11 @@ export async function getAllGatewayModels(): Promise<
   GatewayModelWithCapabilities[]
 > {
   try {
-    const res = await fetch("https://ai-gateway.vercel.sh/v1/models", {
+    const url = process.env.OPENROUTER_API_KEY
+      ? "https://openrouter.ai/api/v1/models"
+      : "https://ai-gateway.vercel.sh/v1/models";
+
+    const res = await fetch(url, {
       next: { revalidate: 86_400 },
     });
     if (!res.ok) {
@@ -131,19 +138,23 @@ export async function getAllGatewayModels(): Promise<
     }
 
     const json = await res.json();
-    return (json.data ?? [])
-      .filter((m: GatewayModel) => m.type === "language")
-      .map((m: GatewayModel) => ({
+    return (json.data ?? []).map((m: GatewayModel) => {
+      const hasVision = m.architecture?.input_modalities?.includes("image") ?? false;
+      const hasTools = m.supported_parameters?.includes("tools") ?? false;
+      const hasReasoning = m.supported_parameters?.includes("reasoning") ?? false;
+
+      return {
         capabilities: {
-          reasoning: m.tags?.includes("reasoning") ?? false,
-          tools: m.tags?.includes("tool-use") ?? false,
-          vision: m.tags?.includes("vision") ?? false,
+          reasoning: hasReasoning,
+          tools: hasTools,
+          vision: hasVision,
         },
-        description: "",
+        description: m.description ?? "",
         id: m.id,
         name: m.name,
         provider: m.id.split("/")[0],
-      }));
+      };
+    });
   } catch {
     return [];
   }

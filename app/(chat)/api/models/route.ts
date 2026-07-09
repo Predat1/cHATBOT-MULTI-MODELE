@@ -7,7 +7,7 @@ export async function GET() {
 
   const curatedCapabilities = await getCapabilities();
 
-  if (isDemo) {
+  if (isDemo || process.env.OPENROUTER_API_KEY) {
     const models = await getAllGatewayModels();
     const capabilities = Object.fromEntries(
       models.map((m) => [m.id, curatedCapabilities[m.id] ?? m.capabilities])

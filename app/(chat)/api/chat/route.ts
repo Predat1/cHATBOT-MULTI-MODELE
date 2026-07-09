@@ -94,7 +94,8 @@ export async function POST(request: Request) {
       return new ChatbotError("unauthorized:chat").toResponse();
     }
 
-    const chatModel = allowedModelIds.has(selectedChatModel)
+    const isModelAllowed = allowedModelIds.has(selectedChatModel) || process.env.OPENROUTER_API_KEY;
+    const chatModel = isModelAllowed
       ? selectedChatModel
       : DEFAULT_CHAT_MODEL;
 
