@@ -1127,3 +1127,33 @@ export const WarningIcon = ({ size = 16 }: { size?: number }) => (
     />
   </svg>
 );
+
+export const OrigynIcon = ({ size = 24, className }: { size?: number; className?: string }) => (
+  <svg
+    height={size}
+    viewBox="0 0 100 100"
+    width={size}
+    className={className}
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g transform="translate(50, 50)">
+      {[0, 1, 2, 3, 4, 5].map((i) => {
+        const isAccent = i === 1;
+        return (
+          <g key={i} transform={`rotate(${i * 60}) translate(0, -31) skewX(-24)`}>
+            <rect
+              x="-7"
+              y="-12"
+              width="14"
+              height="24"
+              rx="4"
+              fill={isAccent ? "#10C7D4" : "currentColor"}
+            />
+          </g>
+        );
+      })}
+    </g>
+  </svg>
+);
+

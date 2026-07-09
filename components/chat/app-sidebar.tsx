@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { OrigynIcon } from "@/components/chat/icons";
 import type { User } from "next-auth";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
@@ -91,10 +92,10 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 <SidebarMenuButton
                   asChild
                   className="size-8 !px-0 items-center justify-center group-data-[collapsible=icon]:group-hover/logo:opacity-0"
-                  tooltip="Chatbot"
+                  tooltip="Origyn"
                 >
                   <Link href="/" onClick={closeMobile}>
-                    <MessageSquareIcon className="size-4 text-sidebar-foreground/50" />
+                    <OrigynIcon className="size-5 text-sidebar-foreground/80" />
                   </Link>
                 </SidebarMenuButton>
                 <Tooltip>

@@ -8,7 +8,7 @@ export const openrouter = createOpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
   headers: {
     "HTTP-Referer": "https://github.com/Predat1/cHATBOT-MULTI-MODELE",
-    "X-Title": "cHATBOT-MULTI-MODELE",
+    "X-Title": "Origyn AI Assistant",
   },
 });
 
