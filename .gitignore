@@ -28,3 +28,4 @@ tsconfig.tsbuildinfo
 lib/db/db-mock.json
 lib/db/queries.ts.original
 scratch/
+.env*

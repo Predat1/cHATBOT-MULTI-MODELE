@@ -9,6 +9,8 @@ import {
   EyeIcon,
   LockIcon,
   WrenchIcon,
+  MicIcon,
+  MicOffIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -112,6 +114,81 @@ function PureMultimodalInput({
   const router = useRouter();
   const { setTheme, resolvedTheme } = useTheme();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  const startListening = useCallback(() => {
+    const SpeechRecognitionAPI =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognitionAPI) {
+      toast("Le contrôle vocal n'est pas supporté par ce navigateur.");
+      return;
+    }
+
+    const recognition = new SpeechRecognitionAPI();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "fr-FR";
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error("Speech Recognition error:", event.error);
+      setIsListening(false);
+      toast(`Erreur de micro: ${event.error}`);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.onresult = (event: any) => {
+      let finalTranscript = "";
+
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        }
+      }
+
+      if (finalTranscript) {
+        setInput((prev) => {
+          const spacer = prev && !prev.endsWith(" ") ? " " : "";
+          return prev + spacer + finalTranscript;
+        });
+      }
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  }, [setInput]);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+  }, []);
+
+  const toggleListening = useCallback(() => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  }, [isListening, startListening, stopListening]);
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
   const { width } = useWindowSize();
   const hasAutoFocused = useRef(false);
   useEffect(() => {
@@ -550,6 +627,27 @@ function PureMultimodalInput({
               selectedModelId={selectedModelId}
               status={status}
             />
+            <Button
+              className={cn(
+                "h-7 w-7 rounded-lg border border-border/40 p-1 transition-all duration-200",
+                isListening
+                  ? "bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400 animate-pulse hover:bg-red-500/20"
+                  : "text-muted-foreground hover:border-border hover:text-foreground"
+              )}
+              onClick={(e) => {
+                e.preventDefault();
+                toggleListening();
+              }}
+              title={isListening ? "Arrêter l'enregistrement vocal" : "Écrire par la voix"}
+              type="button"
+              variant="ghost"
+            >
+              {isListening ? (
+                <MicOffIcon className="size-4 text-red-600 dark:text-red-400" />
+              ) : (
+                <MicIcon className="size-4" />
+              )}
+            </Button>
             <ModelSelectorCompact
               onModelChange={onModelChange}
               selectedModelId={selectedModelId}
