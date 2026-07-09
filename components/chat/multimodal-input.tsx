@@ -990,6 +990,9 @@ function PureModelSelectorCompact({
               xai: "xAI",
               xiaomi: "Xiaomi",
               zai: "Zai",
+              "black-forest-labs": "Black Forest Labs",
+              stabilityai: "Stability AI",
+              "meta-llama": "Meta Llama",
             };
 
             return sortedKeys.map((key) => (

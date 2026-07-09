@@ -43,6 +43,86 @@ export const chatModels: ChatModel[] = [
     provider: "stabilityai",
   },
   {
+    description: "xAI Grok 4.5 frontier intelligence",
+    id: "xai/grok-4.5",
+    name: "Grok 4.5",
+    provider: "xai",
+  },
+  {
+    description: "OpenAI GPT-5.5 Flagship",
+    id: "openai/gpt-5.5",
+    name: "GPT-5.5",
+    provider: "openai",
+  },
+  {
+    description: "OpenAI o4-mini Reasoning",
+    id: "openai/o4-mini",
+    name: "o4-mini",
+    provider: "openai",
+    reasoningEffort: "medium",
+  },
+  {
+    description: "OpenAI o3-pro Advanced Reasoning",
+    id: "openai/o3-pro",
+    name: "o3-pro",
+    provider: "openai",
+    reasoningEffort: "high",
+  },
+  {
+    description: "Anthropic Claude Sonnet 5",
+    id: "anthropic/claude-sonnet-5",
+    name: "Claude Sonnet 5",
+    provider: "anthropic",
+  },
+  {
+    description: "Anthropic Claude Fable 5",
+    id: "anthropic/claude-fable-5",
+    name: "Claude Fable 5",
+    provider: "anthropic",
+  },
+  {
+    description: "Anthropic Claude Opus 4.8",
+    id: "anthropic/claude-opus-4.8",
+    name: "Claude Opus 4.8",
+    provider: "anthropic",
+  },
+  {
+    description: "Google Gemini 3.5 Flash",
+    id: "google/gemini-3.5-flash",
+    name: "Gemini 3.5 Flash",
+    provider: "google",
+  },
+  {
+    description: "Google Gemini 3.5 Pro",
+    id: "google/gemini-3.5-pro",
+    name: "Gemini 3.5 Pro",
+    provider: "google",
+  },
+  {
+    description: "DeepSeek V4 Pro 1.6T MoE",
+    id: "deepseek/deepseek-v4-pro",
+    name: "DeepSeek V4 Pro",
+    provider: "deepseek",
+  },
+  {
+    description: "DeepSeek V4 Flash MoE",
+    id: "deepseek/deepseek-v4-flash",
+    name: "DeepSeek V4 Flash",
+    provider: "deepseek",
+  },
+  {
+    description: "Meta Llama 4 Scout 10M Context",
+    id: "meta-llama/llama-4-scout",
+    name: "Llama 4 Scout",
+    provider: "meta-llama",
+  },
+  {
+    description: "Meta Llama 4 Maverick",
+    id: "meta-llama/llama-4-maverick",
+    name: "Llama 4 Maverick",
+    provider: "meta-llama",
+  },
+  {
     description: "Fast and capable model with tool use",
     gatewayOrder: ["bedrock", "deepinfra"],
     id: "deepseek/deepseek-v3.2",
@@ -86,6 +166,33 @@ export async function getCapabilities(): Promise<
 > {
   const results = await Promise.all(
     chatModels.map(async (model) => {
+      const lowerId = model.id.toLowerCase();
+      if (lowerId === "openai/o4-mini" || lowerId === "openai/o3-pro") {
+        return [model.id, { reasoning: true, tools: true, vision: true }];
+      }
+      if (lowerId === "xai/grok-4.5") {
+        return [model.id, { reasoning: false, tools: true, vision: true }];
+      }
+      if (
+        lowerId === "anthropic/claude-sonnet-5" ||
+        lowerId === "anthropic/claude-fable-5" ||
+        lowerId === "anthropic/claude-opus-4.8"
+      ) {
+        return [model.id, { reasoning: false, tools: true, vision: true }];
+      }
+      if (lowerId.includes("gemini-3.5")) {
+        return [model.id, { reasoning: false, tools: true, vision: true }];
+      }
+      if (lowerId.includes("deepseek-v4")) {
+        return [model.id, { reasoning: false, tools: true, vision: false }];
+      }
+      if (lowerId.includes("llama-4")) {
+        return [model.id, { reasoning: false, tools: true, vision: true }];
+      }
+      if (lowerId === "auto") {
+        return [model.id, { reasoning: true, tools: true, vision: true }];
+      }
+
       try {
         const res = await fetch(
           `https://ai-gateway.vercel.sh/v1/models/${model.id}/endpoints`,
